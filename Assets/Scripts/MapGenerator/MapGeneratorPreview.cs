@@ -5,21 +5,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Profiling;
 
-public class MapGeneratorPreview : MonoBehaviour
+public partial class MapGeneratorPreview : MonoBehaviour
 {
-    public enum PreviewType
-    {
-        Map,
-        HeightMap
-    }
-
-    public enum PointGeneration
-    {
-        Random, PoissonDisc,
-        OffsetGrid,
-        Grid
-    }
-
     [Header("Settings")]
     public PreviewType previewType;
     public HeightMapSettings heightMapSettings;

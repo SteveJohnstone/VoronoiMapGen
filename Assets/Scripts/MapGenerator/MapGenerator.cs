@@ -25,7 +25,7 @@ public static class MapGenerator
 
     private static void SetEdgesToWater(MapGraph graph)
     {
-        foreach(var node in graph.nodesByCenterPosition.Values)
+        foreach (var node in graph.nodesByCenterPosition.Values)
         {
             if (node.IsEdge()) node.nodeType = MapGraph.MapNodeType.FreshWater;
         }
@@ -33,9 +33,9 @@ public static class MapGenerator
 
     private static void AverageCenterPoints(MapGraph graph)
     {
-        foreach(var node in graph.nodesByCenterPosition.Values)
+        foreach (var node in graph.nodesByCenterPosition.Values)
         {
-            node.centerPoint = new Vector3(node.centerPoint.x, node.GetCorners().Average(x=>x.position.y), node.centerPoint.z);
+            node.centerPoint = new Vector3(node.centerPoint.x, node.GetCorners().Average(x => x.position.y), node.centerPoint.z);
         }
     }
 
@@ -88,8 +88,15 @@ public static class MapGenerator
     private static void CreateRiver(MapGraph graph, MapGraph.MapNodeHalfEdge startEdge)
     {
         bool heightUpdated = false;
-        var maxRecursions = 1;
-        var recursions = 0;
+
+        // Once a river has been generated, it tries again to see if a quicker route has been created.
+        // This sets how many times we should go over the same river.
+        var maxIterations = 1;
+        var iterationCount = 0;
+
+        // Make sure that the river generation code doesn't get stuck in a loop.
+        var maxChecks = 100;
+        var checkCount = 0;
 
         var previousRiverEdges = new List<MapGraph.MapNodeHalfEdge>();
         do
@@ -99,9 +106,16 @@ public static class MapGenerator
             var riverEdges = new List<MapGraph.MapNodeHalfEdge>();
             var previousEdge = startEdge;
             var nextEdge = startEdge;
-            
+
             while (nextEdge != null)
             {
+                if (checkCount >= maxChecks)
+                {
+                    Debug.LogError("Unable to find route for river. Maximum number of checks reached");
+                    return;
+                }
+                checkCount++;
+
                 var currentEdge = nextEdge;
 
                 // We've already seen this edge and it's flowing back up itself.
@@ -121,7 +135,7 @@ public static class MapGenerator
 
                     // If we can't get a candidate edge, then backtrack and try again
                     var previousEdgeIndex = riverEdges.Count - 1;
-                    while(nextEdge == null || previousEdgeIndex == 0)
+                    while (nextEdge == null || previousEdgeIndex == 0)
                     {
                         previousEdge = riverEdges[previousEdgeIndex];
                         previousEdge.water--;
@@ -145,8 +159,8 @@ public static class MapGenerator
                 }
                 previousEdge = currentEdge;
             }
-            if (maxRecursions <= recursions) break;
-            recursions++;
+            if (maxIterations <= iterationCount) break;
+            iterationCount++;
 
             // If the height was updated, we need to recheck the river again.
             if (heightUpdated)
@@ -172,11 +186,6 @@ public static class MapGenerator
     private static void LevelEdge(MapGraph.MapNodeHalfEdge currentEdge)
     {
         currentEdge.destination.position = new Vector3(currentEdge.destination.position.x, currentEdge.previous.destination.position.y, currentEdge.destination.position.z);
-        /*
-        var newY = (currentEdge.destination.position.y + currentEdge.previous.destination.position.y) / 2f;
-        currentEdge.destination.position = new Vector3(currentEdge.destination.position.x, newY, currentEdge.destination.position.z);
-        currentEdge.previous.destination.position = new Vector3(currentEdge.previous.destination.position.x, newY, currentEdge.previous.destination.position.z);
-        */
     }
 
     private static MapGraph.MapNodeHalfEdge GetDownSlopeEdge(MapGraph.MapNodeHalfEdge source, List<MapGraph.MapNodeHalfEdge> seenEdges)
@@ -195,7 +204,6 @@ public static class MapGenerator
         if (existingRiverEdge != null) return existingRiverEdge;
 
         return candidates.OrderByDescending(x => x.GetSlopeAngle()).FirstOrDefault();
-        //return candidates.OrderBy(x => x.destination.position.y).FirstOrDefault();
     }
 
     private static MapGraph.MapNodeHalfEdge GetNewCandidateEdge(Vector3 center, MapGraph.MapNodeHalfEdge source, List<MapGraph.MapNodeHalfEdge> seenEdges, List<MapGraph.MapNodeHalfEdge> previousEdges)
