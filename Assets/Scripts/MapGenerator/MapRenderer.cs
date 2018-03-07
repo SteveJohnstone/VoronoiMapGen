@@ -6,7 +6,7 @@ using System.Linq;
 
 public static class MapRenderer
 {
-    public static MeshData GenerateMesh(MapGraph mapGraph, HeightMap heightmap, int meshSize, bool flatshading = false)
+    public static MeshData GenerateMesh(MapGraph mapGraph, HeightMap heightmap, int meshSize)
     {
         var meshData = new MeshData();
         meshData.vertices = new List<Vector3>();
@@ -62,16 +62,16 @@ public static class MapRenderer
         meshData.indices.Add(v3);
     }
 
-    public static TextureData GenerateTexture(MapGraph map, int meshSize, int textureSize)
+    public static TextureData GenerateTexture(MapGraph map, int meshSize, int textureSize, bool drawBoundries, bool drawTriangles, bool drawCenters)
     {
         var textureData = new TextureData();
         textureData.colours = new Color[textureSize * textureSize];
 
         DrawTileTypes(map, meshSize, textureSize, textureData);
-        //DrawCenterPoints(map, meshSize, textureSize, textureData);
-        //DrawEdges(map, meshSize, textureSize, textureData, Color.black);
+        if (drawCenters) DrawCenterPoints(map, meshSize, textureSize, textureData);
+        if (drawBoundries) DrawEdges(map, meshSize, textureSize, textureData, Color.black);
         DrawRivers(map, meshSize, textureSize, textureData, 2, new Color(48f / 255f, 104f / 255f, 153f / 255f));
-        //DrawDelauneyEdges(map, meshSize, textureSize, textureData, Color.red);
+        if (drawTriangles) DrawDelauneyEdges(map, meshSize, textureSize, textureData, Color.red);
 
         return textureData;
     }

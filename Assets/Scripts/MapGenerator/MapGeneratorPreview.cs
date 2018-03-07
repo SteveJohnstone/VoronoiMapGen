@@ -12,6 +12,7 @@ public class MapGeneratorPreview : MonoBehaviour
         Map,
         HeightMap
     }
+
     public enum PointGeneration
     {
         Random, PoissonDisc,
@@ -19,16 +20,20 @@ public class MapGeneratorPreview : MonoBehaviour
         Grid
     }
 
-    public MeshFilter meshFilter;
-    public MeshRenderer meshRenderer;
-    public HeightMapSettings heightMapSettings;
-
-    public int seed = 0;
-
-    public int meshSize = 200;
-    public int textureSize = 512;
-
+    [Header("Settings")]
     public PreviewType previewType;
+    public HeightMapSettings heightMapSettings;
+    public int seed = 0;
+    public bool autoUpdate;
+
+    [Header("Mesh Settings")]
+    public int meshSize = 200;
+
+    [Header("Texture Settings")]
+    public int textureSize = 512;
+    public bool drawNodeBoundries;
+    public bool drawDelauneyTriangles;
+    public bool drawNodeCenters;
 
     [Header("Voronoi Generation")]
     public PointGeneration pointGeneration;
@@ -36,9 +41,9 @@ public class MapGeneratorPreview : MonoBehaviour
     public int relaxationIterations = 1;
     public float snapDistance = 0;
 
-    public bool flatshading;
-
-    public bool autoUpdate;
+    [Header("Outputs")]
+    public MeshFilter meshFilter;
+    public MeshRenderer meshRenderer;
 
     public void Start()
     {
@@ -61,7 +66,10 @@ public class MapGeneratorPreview : MonoBehaviour
         var heightMap = HeightMapGenerator.GenerateHeightMap(meshSize, meshSize, heightMapSettings, Vector2.zero);
 
         var mapGraph = new MapGraph(voronoi, heightMap, snapDistance);
+
+        var time = DateTime.Now;
         MapGenerator.GenerateMap(mapGraph);
+        Debug.Log(string.Format("Map Generated: {0:n0}ms", DateTime.Now.Subtract(time).TotalMilliseconds));
 
         if (previewType == PreviewType.HeightMap)
         {
@@ -70,10 +78,10 @@ public class MapGeneratorPreview : MonoBehaviour
         }
         if (previewType == PreviewType.Map)
         {
-            OnMeshDataReceived(MapRenderer.GenerateMesh(mapGraph, heightMap, meshSize, flatshading));
+            OnMeshDataReceived(MapRenderer.GenerateMesh(mapGraph, heightMap, meshSize));
 
-            var time = DateTime.Now;
-            var texture = MapRenderer.GenerateTexture(mapGraph, meshSize, textureSize);
+            time = DateTime.Now;
+            var texture = MapRenderer.GenerateTexture(mapGraph, meshSize, textureSize, drawNodeBoundries, drawDelauneyTriangles, drawNodeCenters);
             Debug.Log(string.Format("Texture Generated: {0:n0}ms", DateTime.Now.Subtract(time).TotalMilliseconds));
 
             OnTextureDataReceived(texture);
