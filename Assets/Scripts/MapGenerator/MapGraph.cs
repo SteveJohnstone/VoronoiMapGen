@@ -38,16 +38,12 @@ public partial class MapGraph
     public List<MapNodeHalfEdge> edges;
 
     public MapGraph(Voronoi voronoi, HeightMap heightMap, float snapDistance)
-    {
-        var startTime = DateTime.Now;
-
+    {     
         CreateFromVoronoi(voronoi);
 
         if (snapDistance > 0) SnapPoints(snapDistance);
 
         UpdateHeights(heightMap);
-
-        Debug.Log(string.Format("Finished Generating Map Graph: {0:n0}ms with {1} nodes", DateTime.Now.Subtract(startTime).TotalMilliseconds, nodesByCenterPosition.Count));
     }
 
     private void SnapPoints(float snapDistance)

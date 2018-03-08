@@ -145,7 +145,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: ab94ee59a26ecc94c868f052e2ae154e, type: 2}
+  - {fileID: 2100000, guid: 2f6be43fcdca2cd46849ace77bd5715c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -198,7 +198,7 @@ MeshFilter:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 90414403}
-  m_Mesh: {fileID: 1298467024}
+  m_Mesh: {fileID: 784365067}
 --- !u!1 &125710535
 GameObject:
   m_ObjectHideFlags: 0
@@ -283,7 +283,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!43 &1298467024
+--- !u!43 &784365067
 Mesh:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -520,9 +520,9 @@ MonoBehaviour:
   MovementSmoothing: 1
   RotationSmoothing: 0
   IsOrthographic: 0
-  MovementSmoothingValue: 25
+  MovementSmoothingValue: 10
   RotationSmoothingValue: 5
-  MoveSensitivity: 2
+  MoveSensitivity: 5
   allowRotation: 1
 --- !u!1 &1858342692
 GameObject:
