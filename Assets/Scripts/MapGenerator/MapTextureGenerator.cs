@@ -81,6 +81,8 @@ public static class MapTextureGenerator
 
         // clear GL //
         GL.Clear(false, true, color);
+        GL.sRGBWrite = false;
+        
         return renderTexture;
     }
 
