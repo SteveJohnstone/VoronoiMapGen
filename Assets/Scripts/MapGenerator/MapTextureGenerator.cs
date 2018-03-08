@@ -33,20 +33,20 @@ public static class MapTextureGenerator
         }
     }
 
-    public static Texture2D GenerateTexture(MapGraph map, int meshSize, int textureSize, bool drawBoundries, bool drawTriangles, bool drawCenters)
+    public static Texture2D GenerateTexture(MapGraph map, int meshSize, int textureSize, List<MapNodeTypeColor> colours, bool drawBoundries, bool drawTriangles, bool drawCenters)
     {
         CreateDrawingMaterial();
-        var texture = RenderGLToTexture(map, textureSize, meshSize, drawingMaterial, drawBoundries, drawTriangles, drawCenters);
+        var texture = RenderGLToTexture(map, textureSize, meshSize, drawingMaterial, colours, drawBoundries, drawTriangles, drawCenters);
 
         return texture;
     }
 
-    private static Texture2D RenderGLToTexture(MapGraph map, int textureSize, int meshSize, Material material, bool drawBoundries, bool drawTriangles, bool drawCenters)
+    private static Texture2D RenderGLToTexture(MapGraph map, int textureSize, int meshSize, Material material, List<MapNodeTypeColor> colours, bool drawBoundries, bool drawTriangles, bool drawCenters)
     {
         var renderTexture = CreateRenderTexture(textureSize, Color.white);
 
         // render GL immediately to the active render texture //
-        DrawToRenderTexture(map, material, textureSize, meshSize, drawBoundries,drawTriangles, drawCenters);
+        DrawToRenderTexture(map, material, textureSize, meshSize, colours, drawBoundries,drawTriangles, drawCenters);
 
         return CreateTextureFromRenderTexture(textureSize, renderTexture);
     }
@@ -86,14 +86,21 @@ public static class MapTextureGenerator
         return renderTexture;
     }
 
-    private static void DrawToRenderTexture(MapGraph map, Material material, int textureSize, int meshSize, bool drawBoundries, bool drawTriangles, bool drawCenters)
+    private static void DrawToRenderTexture(MapGraph map, Material material, int textureSize, int meshSize, List<MapNodeTypeColor> colours, bool drawBoundries, bool drawTriangles, bool drawCenters)
     {
         material.SetPass(0);
         GL.PushMatrix();
         GL.LoadPixelMatrix(0, meshSize, 0, meshSize);
         GL.Viewport(new Rect(0, 0, textureSize, textureSize));
 
-        var colours = new Dictionary<MapGraph.MapNodeType, Color>
+        var coloursDictionary = new Dictionary<MapGraph.MapNodeType, Color>();
+        foreach (var colour in colours)
+        {
+            if (!coloursDictionary.ContainsKey(colour.type)) coloursDictionary.Add(colour.type, colour.color);
+        }
+
+        /*
+        var coloursDictionary = new Dictionary<MapGraph.MapNodeType, Color>
         {
             { MapGraph.MapNodeType.Beach, new Color(210f / 255f, 180f / 255f, 124f / 255f) },
             { MapGraph.MapNodeType.Grass, new Color(109f / 255f, 154f / 255f, 102f / 255f) },
@@ -104,12 +111,13 @@ public static class MapTextureGenerator
             { MapGraph.MapNodeType.City, Color.gray },
             { MapGraph.MapNodeType.Error, Color.red }
         };
+        */
 
-        DrawNodeTypes(map, colours);
+        DrawNodeTypes(map, coloursDictionary);
 
         if (drawCenters) DrawCenterPoints(map, Color.red);
         if (drawBoundries) DrawEdges(map, Color.black);
-        DrawRivers(map, 2, colours[MapGraph.MapNodeType.FreshWater]);
+        DrawRivers(map, 2, coloursDictionary[MapGraph.MapNodeType.FreshWater]);
         if (drawTriangles) DrawDelauneyEdges(map, Color.red);
 
         GL.PopMatrix();

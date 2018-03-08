@@ -21,6 +21,7 @@ public partial class MapGeneratorPreview : MonoBehaviour
     public bool drawNodeBoundries;
     public bool drawDelauneyTriangles;
     public bool drawNodeCenters;
+    public List<MapNodeTypeColor> colours;
 
     [Header("Voronoi Generation")]
     public PointGeneration pointGeneration;
@@ -31,6 +32,7 @@ public partial class MapGeneratorPreview : MonoBehaviour
     [Header("Outputs")]
     public MeshFilter meshFilter;
     public MeshRenderer meshRenderer;
+    public MeshCollider meshCollider;
 
     public void Start()
     {
@@ -45,6 +47,7 @@ public partial class MapGeneratorPreview : MonoBehaviour
 
     public void GenerateMap()
     {
+
         var startTime = DateTime.Now;
         var points = GetPoints();
 
@@ -77,7 +80,7 @@ public partial class MapGeneratorPreview : MonoBehaviour
             Debug.Log(string.Format("Mesh Generated: {0:n0}ms", DateTime.Now.Subtract(time).TotalMilliseconds));
 
             time = DateTime.Now;
-            var texture = MapTextureGenerator.GenerateTexture(mapGraph, meshSize, textureSize, drawNodeBoundries, drawDelauneyTriangles, drawNodeCenters);
+            var texture = MapTextureGenerator.GenerateTexture(mapGraph, meshSize, textureSize, colours, drawNodeBoundries, drawDelauneyTriangles, drawNodeCenters);
             Debug.Log(string.Format("Texture Generated: {0:n0}ms", DateTime.Now.Subtract(time).TotalMilliseconds));
 
             UpdateTexture(texture);
@@ -162,6 +165,7 @@ public partial class MapGeneratorPreview : MonoBehaviour
         };
         mesh.RecalculateNormals();
         meshFilter.sharedMesh = mesh;
+        meshCollider.sharedMesh = mesh;
     }
 
     void OnValidate()
